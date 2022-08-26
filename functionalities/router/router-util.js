@@ -1,16 +1,26 @@
-function checkPathValidity(path, mayIncludeQueryString = false) {
+function checkPathValidity(path, includeQueryString = false, includeHash) {
     // Check if the provided path is valid at all
     if (!path || (typeof path !== 'string')) {
         throw new Error("Provided path is not valid. It has to be a valid path string defined in routes array.")
     }
 
     // Recognize if path includes queryString
-    if (mayIncludeQueryString) {
+    if (includeQueryString) {
         path = path.split('?')[0]
     } else {
         // Can not pass query string in this method
         if (path.includes('?')) {
             throw new Error("Path string can not include queryString.")
+        }
+    }
+
+    // Recognize if path includes hash
+    if (includeHash) {
+        path = path.split('#')[0]
+    } else {
+        // Can not pass hash in this method
+        if (path.includes('#')) {
+            throw new Error("Path string can not include hash.")
         }
     }
 
@@ -39,4 +49,4 @@ function getQueryParamObjectFromString(queryString) {
     return obj
 }
 
-module.exports = { checkPathValidity, getQueryParamObjectFromString }
+export { checkPathValidity, getQueryParamObjectFromString }

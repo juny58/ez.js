@@ -1,4 +1,5 @@
-const { checkPathValidity, getQueryParamObjectFromString } = require("./router-util");
+import { checkPathValidity, getQueryParamObjectFromString } from "./router-util";
+
 /**
  * Route map object holding data for each valid path
  */
@@ -79,18 +80,18 @@ function route(path, routeSpecObj = {}) {
         }
     }
 
+    if (routeSpecObj.hash) {
+        url.hash = routeSpecObj.hash
+    }
+
     // Do routing only when url actually changes
     if (window.location.href !== url.toString()) {
-        try {
-            if (routeSpecObj.replaceUrl) {
-                // This replaces the url with new one and can not be navigated with browser back or forward
-                history.replaceState(state, '', url)
-            } else {
-                // This pushes the new url in the history stack, so can be navigated with browser back or forward
-                history.pushState(state, '', url)
-            }
-        } catch (err) {
-            throw err
+        if (routeSpecObj.replaceUrl) {
+            // This replaces the url with new one and can not be navigated with browser back or forward
+            history.replaceState(state, '', url)
+        } else {
+            // This pushes the new url in the history stack, so can be navigated with browser back or forward
+            history.pushState(state, '', url)
         }
     }
 }
@@ -102,10 +103,18 @@ function route(path, routeSpecObj = {}) {
  * @param routeSpecObj holds the routing specifics without the queryParams. That has to be with path string if needed
  */
 function routeTo(path, routeSpecObj = {}) {
-    checkPathValidity(path, true);
+    // Check path validity
+    checkPathValidity(path, true, true);
 
-    // Throw error for non-existing path
-    const pathWithoutParams = path.split('?')[0];
+    let pathWithoutParams
+    if (path.contains('?')) {
+        pathWithoutParams = path.split('?')[0];
+    }
+
+    if (path.contains('#')) {
+        pathWithoutParams = path.split('#')[0];
+    }
+
     if (!routeMap[pathWithoutParams]) {
         throw new Error(`Error: Path not found => "${path}"`)
     }
@@ -120,18 +129,14 @@ function routeTo(path, routeSpecObj = {}) {
 
     // Do routing only when url actually changes
     if (window.location.href !== path) {
-        try {
-            if (routeSpecObj.replaceUrl) {
-                // This replaces the url with new one and can not be navigated with browser back or forward
-                history.replaceState(state, '', path)
-            } else {
-                // This pushes the new url in the history stack, so can be navigated with browser back or forward
-                history.pushState(state, '', path)
-            }
-        } catch (err) {
-            throw err
+        if (routeSpecObj.replaceUrl) {
+            // This replaces the url with new one and can not be navigated with browser back or forward
+            history.replaceState(state, '', path)
+        } else {
+            // This pushes the new url in the history stack, so can be navigated with browser back or forward
+            history.pushState(state, '', path)
         }
     }
 }
 
-module.exports = { setRouteMap, route, routeTo }
+export { setRouteMap, route, routeTo }
