@@ -1,4 +1,4 @@
-function checkPathValidity(path, includeQueryString = false, includeHash) {
+export function checkPathValidity(path, includeQueryString = false, includeHash) {
     // Check if the provided path is valid at all
     if (!path || (typeof path !== 'string')) {
         throw new Error("Provided path is not valid. It has to be a valid path string defined in routes array.")
@@ -38,7 +38,7 @@ function checkPathValidity(path, includeQueryString = false, includeHash) {
     }
 }
 
-function getQueryParamObjectFromString(queryString) {
+export function getQueryParamObjectFromString(queryString) {
     const params = new URLSearchParams(queryString);
     const keys = params.keys();
     const values = params.values();
@@ -48,5 +48,3 @@ function getQueryParamObjectFromString(queryString) {
     });
     return obj
 }
-
-export { checkPathValidity, getQueryParamObjectFromString }

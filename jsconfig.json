@@ -1,0 +1,6 @@
+{
+    "compilerOptions": {
+        "experimentalDecorators": true
+    },
+    "exclude": ["node_modules/", "working-directory/node_modules/"]
+}
