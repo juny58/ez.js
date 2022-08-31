@@ -6,10 +6,15 @@ const renderedSelectors = {};
  * the details to create component
  */
 export function Component(componentSpecs) {
+    componentSpecs = { isScoped: true, uses: [], ...componentSpecs };
+    componentSpecs.selectorMap = {};
+    componentSpecs.uses.forEach(componentRef => {
+        componentSpecs.selectorMap[componentRef.componentSpecs.selector] = componentRef
+    });
+    
     // Actual decorator function
-    componentSpecs = { isScoped: true, ...componentSpecs };
     return (TargetClass) => {
-        const tc = new TargetClass();
+        let tc = new TargetClass();
         prepareAndAppendScopedStyle(componentSpecs);
         tc.componentSpecs = componentSpecs;
         return tc;
@@ -26,7 +31,7 @@ function prepareAndAppendScopedStyle(componentSpecs) {
     if (componentSpecs.isScoped) {
         componentSpecs.style = componentSpecs.style.replaceAll('replaceWithScopedSelector', componentSpecs.selector);
     } else {
-        componentSpecs.style = componentSpecs.style.replaceAll('replaceWithScopedSelector ', '');
+        componentSpecs.style = componentSpecs.style.replaceAll('replaceWithScopedSelector > ', '');
     }
     componentSpecs.style = componentSpecs.style.replaceAll(':host', componentSpecs.selector);
     if (!renderedSelectors[componentSpecs.selector]) {

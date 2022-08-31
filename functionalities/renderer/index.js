@@ -1,5 +1,5 @@
 import style from './assets/style.css?exclude=true';
-import { renderComponent } from './rendition-handler';
+import { renderComponent } from './rendition/rendition-handler';
 
 export function initialize(initComponentObj) {
     // Insert global styles
@@ -14,6 +14,7 @@ export function initialize(initComponentObj) {
 
     // Assign querySelector string to be used as a property of the component
     initComponentObj.querySelector = initComponentObj.componentSpecs.selector;
+    initComponentObj.elementRef = document.querySelector(initComponentObj.querySelector)
 
     // Render init component now
     renderComponent(initComponentObj)
