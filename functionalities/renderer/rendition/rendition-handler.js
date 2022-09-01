@@ -1,3 +1,4 @@
+import { get$$ParsedHtml } from "./$$-parser";
 import { getTemplateVariableValue } from "./template-variable-parser";
 
 /**
@@ -40,7 +41,7 @@ function assignVariablesToHtml(componentObj) {
     const currentHtml = componentObj.currentHtml || componentObj.componentSpecs.template;
     const htmlToInsert = currentHtml.replaceAll(/{{(.*?)}}/g, (match) => {
         const matchingVar = match.split(/{{|}}/).filter(Boolean)[0];
-        return getTemplateVariableValue(componentObj, matchingVar)
+        return get$$ParsedHtml(componentObj, matchingVar)
     });
     document.querySelector(componentObj.querySelector).innerHTML = htmlToInsert;
     componentObj.currentHtml = htmlToInsert;
