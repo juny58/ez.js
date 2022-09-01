@@ -4,7 +4,7 @@
  * @param {string} interPolatedString The string that has been interpolated
  * @returns the value which is yielded by the interpolation
  */
-export function get$$ParsedHtml(scopedVars, interPolatedString) {
+export function getParsedHtml(scopedVars, interPolatedString) {
     const val = interPolatedString.replaceAll(/\$\w+/g, match => {
         return `scopedVars.${match.substring(1)}`;
     });

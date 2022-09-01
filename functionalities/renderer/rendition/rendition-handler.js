@@ -1,5 +1,5 @@
-import { get$$ParsedHtml } from "./$$-parser";
-import { getTemplateVariableValue } from "./template-variable-parser";
+import { handleAttributes } from "./attribute-handler";
+import { getParsedHtml } from "./template-parser";
 
 /**
  * A variable that keeps track of number of components rendered. It helps in creating unique id of every rendered component
@@ -38,17 +38,17 @@ function compileHtml(componentObj) {
  * @param componentObj Holds the data for each component
  */
 function assignVariablesToHtml(componentObj) {
-    const currentHtml = componentObj.currentHtml || componentObj.componentSpecs.template;
-    const htmlToInsert = currentHtml.replaceAll(/{{(.*?)}}/g, (match) => {
+    const htmlToInsert = componentObj.currentHtml.replaceAll(/{{(.*?)}}/g, (match) => {
         const matchingVar = match.split(/{{|}}/).filter(Boolean)[0];
-        return get$$ParsedHtml(componentObj, matchingVar)
+        return getParsedHtml(componentObj, matchingVar);
     });
     document.querySelector(componentObj.querySelector).innerHTML = htmlToInsert;
-    componentObj.currentHtml = htmlToInsert;
 }
 
 function travarseNodes(componentObj, domTree) {
     for (const element of domTree.children) {
+        // Checking for custom elements
+        let travarsingRequired = true;
         if (element.nodeName.split('-')[0] && element.nodeName.split('-')[1]) {
             // Means this node is a custom component
             const componentRef = componentObj.componentSpecs.selectorMap[element.localName];
@@ -60,6 +60,7 @@ function travarseNodes(componentObj, domTree) {
                     renditionRequired = !hasRouterOutletInitiated;
                     if (renditionRequired) {
                         hasRouterOutletInitiated = true;
+                        travarsingRequired = false;
                     }
                 } else {
                     renditionRequired = !element.hasAttribute('component');
@@ -68,7 +69,7 @@ function travarseNodes(componentObj, domTree) {
                         const uniqueComponentId = `ezc${componentRenderCount}`;
                         element.setAttribute(uniqueComponentId, '');
                         componentRef.querySelector = `${element.localName}[${uniqueComponentId}]`;
-                        componentRef.elementRef = document.querySelector(componentRef.querySelector)
+                        componentRef.elementRef = document.querySelector(componentRef.querySelector);
                         componentRenderCount++;
                     }
                 }
@@ -77,11 +78,12 @@ function travarseNodes(componentObj, domTree) {
                 }
             } else {
                 console.error(`Selector "${element.localName}" is not a valid component selector. Make sure to include the ` +
-                `respective component class in "uses" array inside @Component decorator.`)
+                    `respective component class in "uses" array inside @Component decorator.`);
             }
         }
-        if (element.children.lenth) {
-            travarseNodes(componentObj, element.children);
+        // If has children, travarse down the line
+        if (travarsingRequired && element.children.length) {
+            travarseNodes(componentObj, element);
         }
     }
 }
