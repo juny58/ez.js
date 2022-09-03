@@ -38,7 +38,7 @@ function compileHtml(componentObj) {
  * @param componentObj Holds the data for each component
  */
 function assignVariablesToHtml(componentObj) {
-    const htmlToInsert = componentObj.currentHtml.replaceAll(/{{(.*?)}}/g, (match) => {
+    const htmlToInsert = componentObj.componentSpecs.template.replaceAll(/{{(.*?)}}/g, (match) => {
         const matchingVar = match.split(/{{|}}/).filter(Boolean)[0];
         return getParsedHtml(componentObj, matchingVar);
     });
