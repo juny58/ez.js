@@ -1,4 +1,4 @@
-import { handleAttributes } from "./attribute-handler";
+import { handleAttributes, handleCustomRendition } from "./attribute-handler";
 import { getParsedHtml } from "./template-parser";
 
 /**
@@ -29,23 +29,32 @@ export function renderComponent(componentObj) {
  * @param componentObj Holds the data for each component
  */
 function compileHtml(componentObj) {
-    assignVariablesToHtml(componentObj);
-    travarseNodes(componentObj, document.querySelector(componentObj.querySelector));
+    const componentNode = new DOMParser().parseFromString(componentObj.componentSpecs.template, 'text/html').body;
+    handleCustomRendition(componentNode, componentObj);
+    assignVariablesToHtml(componentObj, componentNode.innerHTML);
+    const componentRef = document.querySelector(componentObj.querySelector);
+    handleAttributes(componentRef, componentObj);
+    createCustomComponents(componentObj, componentRef);
 }
 
 /**
  * Assigns variables available in component class to the corresponding html
  * @param componentObj Holds the data for each component
  */
-function assignVariablesToHtml(componentObj) {
-    const htmlToInsert = componentObj.componentSpecs.template.replaceAll(/{{(.*?)}}/g, (match) => {
+function assignVariablesToHtml(componentObj, rawHtml) {
+    const htmlToInsert = rawHtml.replaceAll(/{{(.*?)}}/g, (match) => {
         const matchingVar = match.split(/{{|}}/).filter(Boolean)[0];
         return getParsedHtml(componentObj, matchingVar);
     });
     document.querySelector(componentObj.querySelector).innerHTML = htmlToInsert;
 }
 
-function travarseNodes(componentObj, domTree) {
+/**
+ * Travarses through every node to find if any new custom component is found, if found, renders that
+ * @param {{}} componentObj The instance of the component object
+ * @param {HTMLElement} domTree The node to be travered
+ */
+function createCustomComponents(componentObj, domTree) {
     for (const element of domTree.children) {
         // Checking for custom elements
         let travarsingRequired = true;
@@ -83,7 +92,7 @@ function travarseNodes(componentObj, domTree) {
         }
         // If has children, travarse down the line
         if (travarsingRequired && element.children.length) {
-            travarseNodes(componentObj, element);
+            createCustomComponents(componentObj, element);
         }
     }
 }

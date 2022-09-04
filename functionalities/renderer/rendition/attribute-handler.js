@@ -3,26 +3,59 @@ import { executeEvent } from "./events-handler";
 const builtInAttributes = ['ezif', 'ezrepeat'];
 
 /**
- * Handles attributes for an element
- * @param {HTMLElement} element for which attributes need to be handled
- * @param {{}} variableScope Available ariables to the element
+ * This function handles all custom rendition by looking into ezIf and ezRepeat
+ * @param {HTMLElement} htmlNode The container element
+ * @param {{}} variableScope The variable container object
  */
-export function handleAttributes(element, variableScope) {
+export function handleCustomRendition(htmlNode, variableScope) {
+    for (const element of htmlNode.children) {
+        handleCustomRenditionForElement(element, variableScope);
+        if (element.hide) {
+            element.replaceWith(document.createComment(''));
+        }
+        if (!element.hide && element.children) {
+            handleCustomRendition(element, variableScope);
+        }
+    }
+}
+
+function handleCustomRenditionForElement(element, variableScope) {
     for (const attribute of element.attributes) {
         if (builtInAttributes.includes(attribute.name)) {
-            // Handle ezRepeat builtInAttributes
-            if (attribute.name === 'ezif' && !isEzIfTruthy(variableScope, attribute.value)) {
-                element.replaceWith(document.createComment(""));
-                return false;
+            // Handle ezIf builtInAttribute
+            if (attribute.name === 'ezif') {
+                element.hide = !isEzIfTruthy(variableScope, attribute);
             }
-        } else {
+        }
+    }
+}
+
+/**
+ * Handles attributes for an component elements
+ * @param {HTMLElement} htmlNode for which attributes need to be handled
+ * @param {{}} variableScope Available ariables to the node
+ */
+export function handleAttributes(htmlNode, variableScope) {
+    for (const element of htmlNode.children) {
+        handleAttributesForElement(element, variableScope);
+        if (element.children) {
+            handleAttributes(element, variableScope);
+        }
+    }
+}
+
+function handleAttributesForElement(element, variableScope) {
+    for (const attribute of element.attributes) {
+        if (!builtInAttributes.includes(attribute.name) && attribute.value) {
             // Handle events
             element[attribute.name] = ($event) => executeEvent(variableScope, attribute.value, $event);
         }
     }
-    return true;
 }
 
-function isEzIfTruthy(variableScope, attributeValue) {
-    return eval(attributeValue);
+function isEzIfTruthy(scopedVars, attribute) {
+    let val = attribute.value.replaceAll(/\$\w+/g, match => {
+        return `scopedVars.${match.substring(1)}`;
+    });
+    return eval(val);
 }
