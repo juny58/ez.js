@@ -1,4 +1,5 @@
-import { handleAttributes, handleCustomRendition } from "./attribute-handler";
+import { handleAttributes } from "./attribute-handler";
+import { handleCustomRendition } from "./custom-rendition";
 import { getParsedHtml } from "./template-parser";
 
 /**
