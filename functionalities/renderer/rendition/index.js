@@ -1,6 +1,5 @@
 import { handleAttributes } from "./attribute-handler";
 import { handleCustomRendition } from "./custom-rendition";
-import { getParsedHtml } from "./template-parser";
 
 /**
  * A variable that keeps track of number of components rendered. It helps in creating unique id of every rendered component
@@ -32,22 +31,11 @@ export function renderComponent(componentObj) {
 function compileHtml(componentObj) {
     const componentNode = new DOMParser().parseFromString(componentObj.componentSpecs.template, 'text/html').body;
     handleCustomRendition(componentNode, componentObj);
-    assignVariablesToHtml(componentObj, componentNode.innerHTML);
+    // This would need to change in future so that we can put the whole html object and insert into component
+    document.querySelector(componentObj.querySelector).innerHTML = componentNode.innerHTML;
     const componentRef = document.querySelector(componentObj.querySelector);
     handleAttributes(componentRef, componentObj);
     createCustomComponents(componentObj, componentRef);
-}
-
-/**
- * Assigns variables available in component class to the corresponding html
- * @param componentObj Holds the data for each component
- */
-function assignVariablesToHtml(componentObj, rawHtml) {
-    const htmlToInsert = rawHtml.replaceAll(/{{(.*?)}}/g, (match) => {
-        const matchingVar = match.split(/{{|}}/).filter(Boolean)[0];
-        return getParsedHtml(componentObj, matchingVar);
-    });
-    document.querySelector(componentObj.querySelector).innerHTML = htmlToInsert;
 }
 
 /**

@@ -1,5 +1,5 @@
 import style from './assets/style.css?exclude=true';
-import { renderComponent } from './rendition/rendition-handler';
+import { renderComponent } from './rendition';
 
 export function initialize(initComponentObj) {
     // Insert global styles
